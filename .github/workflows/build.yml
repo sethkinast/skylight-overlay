@@ -18,8 +18,10 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # No setup-android step: ubuntu-latest already ships the Android SDK
+      # at /usr/local/lib/android/sdk, and setup-android v3 tries to install
+      # the obsolete "tools" package via sdkmanager, which fails with exit 1.
+      # AGP finds the preinstalled SDK via ANDROID_HOME.
 
       - name: Build debug APK with Gradle
         uses: gradle/gradle-build-action@v3

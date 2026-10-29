@@ -1,0 +1,31 @@
+// Legacy apply, matching the buildscript classpath in the root
+// build.gradle. Using `plugins { id ... }` without a version here
+// would fail to resolve the plugin; this form does not.
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.cogdev.skylightoverlay'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId 'com.cogdev.skylightoverlay'
+        minSdk 28
+        targetSdk 33
+        versionCode 1
+        versionName '0.1.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        debug {
+            debuggable true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

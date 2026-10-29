@@ -1,4 +1,4 @@
-package com.cogdev.skylightoverlay;
+package net.cogdev.skylightoverlay;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

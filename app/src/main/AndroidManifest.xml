@@ -11,7 +11,7 @@
 
     <application
         android:allowBackup="true"
-        android:label="Skylight Hatch"
+        android:label="Skylight Escape Hatch"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
 

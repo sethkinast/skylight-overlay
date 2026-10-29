@@ -1,4 +1,4 @@
-package com.cogdev.skylightoverlay;
+package net.cogdev.skylightoverlay;
 
 import android.content.Context;
 import android.content.Intent;

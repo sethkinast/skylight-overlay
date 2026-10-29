@@ -1,4 +1,4 @@
-package com.cogdev.skylightoverlay;
+package net.cogdev.skylightoverlay;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -30,7 +30,7 @@ public class MainActivity extends Activity {
         layout.setPadding(pad, pad, pad, pad);
 
         TextView title = new TextView(this);
-        title.setText("Skylight Hatch");
+        title.setText("Skylight Escape Hatch");
         title.setTextSize(24f);
         layout.addView(title);
 

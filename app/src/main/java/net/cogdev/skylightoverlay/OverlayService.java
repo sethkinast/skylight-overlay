@@ -1,4 +1,4 @@
-package com.cogdev.skylightoverlay;
+package net.cogdev.skylightoverlay;
 
 import android.app.Notification;
 import android.app.NotificationChannel;

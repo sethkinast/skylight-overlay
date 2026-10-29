@@ -1,5 +1,4 @@
-// Top-level build file. No dependencies beyond the Android Gradle Plugin,
-// so a first build only needs the AGP + SDK 33 already cached from grafmote.
+// Top-level build file. No dependencies beyond the Android Gradle Plugin.
 buildscript {
     repositories {
         google()
@@ -10,13 +9,10 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
+// No allprojects repositories here: settings.gradle sets
+// repositoriesMode FAIL_ON_PROJECT_REPOS, so dependency repositories
+// must come from settings.gradle only. The buildscript repositories
+// above are separate and are still allowed.
 tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }

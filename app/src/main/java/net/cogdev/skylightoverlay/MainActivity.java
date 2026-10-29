@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
         TextView body = new TextView(this);
         body.setText(
                 "Gear icon next to Sleep on Skylight's bottom bar.\n"
-                        + "Tap: nothing.\n"
+                        + "Tap: return to Skylight (Home).\n"
                         + "Hold 5 seconds: opens Android Settings.\n\n"
                         + "First grant Draw over other apps, then Start.");
         body.setPadding(0, pad, 0, pad);
@@ -80,6 +80,19 @@ public class MainActivity extends Activity {
             }
         });
         layout.addView(stopButton);
+
+        Button rendererButton = new Button(this);
+        rendererButton.setText("Open Red Pepper Chicken recipe");
+        rendererButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent renderer = new Intent(MainActivity.this, RendererActivity.class);
+                renderer.putExtra(RendererActivity.EXTRA_ASSET, "red-pepper-chicken.html");
+                renderer.putExtra(RendererActivity.EXTRA_TITLE, "Red Pepper Chicken");
+                startActivity(renderer);
+            }
+        });
+        layout.addView(rendererButton);
 
         setContentView(layout);
     }

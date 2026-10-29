@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Red Pepper Chicken</title>
+<style>
+  body { font-family: sans-serif; margin: 0; padding: 16px 20px 48px 20px; color: #111; background: #fff; font-size: 22px; line-height: 1.45; }
+  h1 { font-size: 38px; margin: 0 0 8px 0; }
+  h2 { font-size: 30px; margin: 32px 0 8px 0; }
+  h3 { font-size: 24px; margin: 20px 0 8px 0; }
+  p { margin: 8px 0; }
+  .meta { color: #444; font-size: 20px; }
+  .note { background: #fff8e1; border: 1px solid #e6c87a; padding: 12px 16px; font-size: 20px; }
+  ul { margin: 8px 0; padding-left: 8px; list-style: none; }
+  li { margin: 10px 0; }
+  li label { display: block; padding: 6px 0; }
+  li input { width: 28px; height: 28px; vertical-align: middle; margin-right: 12px; }
+  li.checked label { color: #888; text-decoration: line-through; }
+  .step { border: 2px solid #ddd; padding: 16px 20px 20px 20px; margin: 20px 0; }
+  .step.done { border-color: #4caf50; }
+  .timer { background: #f2f2f2; padding: 16px; margin-top: 16px; }
+  .timer .display { font-size: 44px; font-weight: bold; display: block; margin: 8px 0; }
+  .timer .status { font-size: 24px; font-weight: bold; color: #c62828; }
+  button { font-size: 22px; padding: 12px 18px; margin: 6px 6px 6px 0; min-height: 52px; }
+  .jump a { font-size: 22px; margin-right: 18px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<h1>Red Pepper Chicken</h1>
+<p class="meta">Prep &amp; Cook: 25&ndash;35 min &middot; Easy &middot; Not Spicy<br>Oven: 425&deg;F &middot; Chicken to at least 165&deg;F</p>
+<p class="note">Public Home Chef card serves 2. Your box is 4 servings, so ingredient quantities in the box are double. Steps and times are the same.</p>
+
+<p class="jump">Jump to: <a href="#step1">Step 1</a> <a href="#step2">Step 2</a> <a href="#step3">Step 3</a></p>
+
+<h2>Ingredients</h2>
+<ul id="ingredients">
+  <li><label><input type="checkbox">12 oz. Boneless Skinless Chicken Breasts</label></li>
+  <li><label><input type="checkbox">8 oz. Cooked Penne Pasta</label></li>
+  <li><label><input type="checkbox">4 fl. oz. Cream Sauce Base</label></li>
+  <li><label><input type="checkbox">4 oz. Sliced Red Bell Pepper</label></li>
+  <li><label><input type="checkbox">1 oz. Shredded Mozzarella</label></li>
+  <li><label><input type="checkbox">&frac12; oz. Baby Spinach</label></li>
+  <li><label><input type="checkbox">1 Tbsp. Roasted Red Pepper Pesto</label></li>
+  <li><label><input type="checkbox">2 Tbsp. Panko Breadcrumbs</label></li>
+  <li><label><input type="checkbox">&frac12; tsp. Garlic Salt</label></li>
+</ul>
+
+<h3>You will need</h3>
+<ul>
+  <li>Cooking Spray</li>
+  <li>1 Microwave-Safe Bowl</li>
+</ul>
+
+<div class="step" id="step1">
+<h2>Step 1 &mdash; Start the Chicken</h2>
+<p>Turn oven on to 425 degrees. Let preheat, at least 10 minutes. Thoroughly rinse any fresh produce and pat dry.</p>
+<p>Place <b>panko</b> on a plate and spread into an even layer.</p>
+<p>Pat <b>chicken</b> dry and season both sides with half the <b>garlic salt</b> (reserve remaining for pasta). Place chicken onto panko, pressing gently to adhere to one side. Transfer chicken to provided tray, panko-side up, and spray with <b>cooking spray</b>.</p>
+<p>Bake uncovered in hot oven until chicken starts to brown, 10-15 minutes.</p>
+<p><i>Chicken will finish cooking in a later step. While chicken bakes, continue recipe.</i></p>
+
+<div class="timer" data-minutes="10">
+  <b>Preheat timer</b>
+  <span class="display">10:00</span>
+  <span class="status"></span>
+  <div>
+    <button class="start">Start</button>
+    <button class="pause">Pause</button>
+    <button class="reset">Reset</button>
+    <button class="minus">&minus;1 min</button>
+    <button class="plus">+1 min</button>
+    <button class="dismiss hidden">Dismiss sound</button>
+  </div>
+</div>
+
+<div class="timer" data-minutes="15">
+  <b>First bake timer &mdash; 10&ndash;15 min, default 15 min</b>
+  <span class="display">15:00</span>
+  <span class="status"></span>
+  <div>
+    <button class="start">Start</button>
+    <button class="pause">Pause</button>
+    <button class="reset">Reset</button>
+    <button class="minus">&minus;1 min</button>
+    <button class="plus">+1 min</button>
+    <button class="dismiss hidden">Dismiss sound</button>
+  </div>
+</div>
+<p><label><input type="checkbox" class="stepdone"> Step 1 done</label></p>
+</div>
+
+<div class="step" id="step2">
+<h2>Step 2 &mdash; Add the Pasta</h2>
+<p>Tear <b>spinach</b> leaves.</p>
+<p>Add <b>peppers</b> to a microwave-safe bowl. Microwave uncovered until tender, 3-4 minutes.</p>
+<p>Carefully remove bowl from microwave and tray from oven.</p>
+<p>Transfer <b>chicken</b> to a plate.</p>
+<p>In now-empty tray, combine <b>cream base</b>, peppers, spinach, half the <b>pesto</b> (reserve remaining for chicken), remaining <b>garlic salt</b>, and <b>pasta</b>. Stir until coated and push to one side. <i>Tray will be hot! Use a utensil.</i></p>
+<p>Place chicken in now-empty side of tray. Top with remaining pesto, then <b>cheese</b>.</p>
+
+<div class="timer" data-minutes="4">
+  <b>Microwave peppers timer &mdash; 3&ndash;4 min, default 4 min</b>
+  <span class="display">4:00</span>
+  <span class="status"></span>
+  <div>
+    <button class="start">Start</button>
+    <button class="pause">Pause</button>
+    <button class="reset">Reset</button>
+    <button class="minus">&minus;1 min</button>
+    <button class="plus">+1 min</button>
+    <button class="dismiss hidden">Dismiss sound</button>
+  </div>
+</div>
+<p><label><input type="checkbox" class="stepdone"> Step 2 done</label></p>
+</div>
+
+<div class="step" id="step3">
+<h2>Step 3 &mdash; Bake the Meal</h2>
+<p>Bake uncovered in hot oven until <b>pasta</b> is heated through and <b>chicken</b> reaches a minimum internal temperature of 165 degrees, 10-15 minutes.</p>
+<p>Carefully remove tray from oven and plate dish as pictured on front of card. Bon app&eacute;tit!</p>
+
+<div class="timer" data-minutes="15">
+  <b>Final bake timer &mdash; 10&ndash;15 min, default 15 min</b>
+  <span class="display">15:00</span>
+  <span class="status"></span>
+  <div>
+    <button class="start">Start</button>
+    <button class="pause">Pause</button>
+    <button class="reset">Reset</button>
+    <button class="minus">&minus;1 min</button>
+    <button class="plus">+1 min</button>
+    <button class="dismiss hidden">Dismiss sound</button>
+  </div>
+</div>
+<p><label><input type="checkbox" class="stepdone"> Step 3 done</label></p>
+</div>
+
+<script>
+var audioCtx = null;
+function ensureAudio() {
+  try {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+  } catch (e) {}
+}
+function beep() {
+  if (!audioCtx) return;
+  try {
+    var now = audioCtx.currentTime;
+    for (var i = 0; i < 3; i++) {
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.value = 0.25;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      var t = now + i * 0.6;
+      osc.start(t);
+      osc.stop(t + 0.4);
+    }
+  } catch (e) {}
+}
+function fmt(sec) {
+  if (sec < 0) sec = 0;
+  var m = Math.floor(sec / 60);
+  var s = sec % 60;
+  return m + ':' + (s < 10 ? '0' + s : s);
+}
+function setupTimer(el) {
+  var minutes = parseInt(el.getAttribute('data-minutes'), 10) || 0;
+  var total = minutes * 60;
+  var remaining = total;
+  var endTime = 0;
+  var running = false;
+  var done = false;
+  var chimeId = null;
+  var display = el.querySelector('.display');
+  var status = el.querySelector('.status');
+  var dismiss = el.querySelector('.dismiss');
+  function render() { display.textContent = fmt(remaining); }
+  function stopChime() {
+    if (chimeId) { clearInterval(chimeId); chimeId = null; }
+    dismiss.classList.add('hidden');
+  }
+  function finish() {
+    running = false;
+    done = true;
+    remaining = 0;
+    render();
+    status.textContent = 'DONE';
+    dismiss.classList.remove('hidden');
+    beep();
+    chimeId = setInterval(beep, 5000);
+  }
+  el.querySelector('.start').addEventListener('click', function() {
+    ensureAudio();
+    if (done) { remaining = total; done = false; status.textContent = ''; stopChime(); }
+    if (running) return;
+    running = true;
+    endTime = Date.now() + remaining * 1000;
+  });
+  el.querySelector('.pause').addEventListener('click', function() {
+    if (!running) return;
+    running = false;
+    remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+    render();
+  });
+  el.querySelector('.reset').addEventListener('click', function() {
+    running = false;
+    done = false;
+    remaining = total;
+    status.textContent = '';
+    stopChime();
+    render();
+  });
+  el.querySelector('.minus').addEventListener('click', function() {
+    if (running) { endTime -= 60000; } else { total = Math.max(60, total - 60); remaining = total; }
+    if (running) { remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000)); }
+    render();
+  });
+  el.querySelector('.plus').addEventListener('click', function() {
+    if (running) { endTime += 60000; } else { total += 60; remaining = total; }
+    if (running) { remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000)); }
+    render();
+  });
+  dismiss.addEventListener('click', function() {
+    stopChime();
+    status.textContent = 'DONE (sound dismissed)';
+  });
+  setInterval(function() {
+    if (!running) return;
+    remaining = Math.round((endTime - Date.now()) / 1000);
+    if (remaining <= 0) { finish(); } else { render(); }
+  }, 500);
+  render();
+}
+var timers = document.querySelectorAll('.timer');
+for (var i = 0; i < timers.length; i++) { setupTimer(timers[i]); }
+var checks = document.querySelectorAll('#ingredients input');
+for (var j = 0; j < checks.length; j++) {
+  checks[j].addEventListener('change', function(e) {
+    var li = e.target.closest('li');
+    if (li) { li.classList.toggle('checked', e.target.checked); }
+  });
+}
+var dones = document.querySelectorAll('.stepdone');
+for (var k = 0; k < dones.length; k++) {
+  dones[k].addEventListener('change', function(e) {
+    var step = e.target.closest('.step');
+    if (step) { step.classList.toggle('done', e.target.checked); }
+  });
+}
+</script>
+</body>
+</html>

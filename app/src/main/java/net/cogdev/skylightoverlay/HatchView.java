@@ -111,7 +111,10 @@ public class HatchView extends View {
         super.onDraw(canvas);
         float cx = getWidth() / 2f;
         float cy = getHeight() / 2f;
-        float outer = Math.min(getWidth(), getHeight()) * 0.38f;
+        // Visual gear is deliberately smaller than the touch view:
+        // touch view stays full bar height (~82px) for a fat tap target,
+        // the drawn gear is ~42px, matching Skylight's other bar icons.
+        float outer = Math.min(getWidth(), getHeight()) * 0.26f;
         float inner = outer * 0.45f;
 
         // Gear teeth: 8 rectangles around the circle.
@@ -130,10 +133,10 @@ public class HatchView extends View {
         canvas.drawCircle(0, 0, inner, centrePaint);
         canvas.restore();
 
-        // Progress ring, only while holding.
+        // Progress ring, only while holding, sized to the gear.
         if (pressing && progress > 0f) {
-            float pad = 8f;
-            ringRect.set(pad, pad, getWidth() - pad, getHeight() - pad);
+            float ringR = outer + 10f;
+            ringRect.set(cx - ringR, cy - ringR, cx + ringR, cy + ringR);
             canvas.drawArc(ringRect, -90f, 360f, false, ringBgPaint);
             canvas.drawArc(ringRect, -90f, 360f * progress, false, ringPaint);
         }
@@ -151,6 +154,24 @@ public class HatchView extends View {
                 invalidate();
                 return true;
             case MotionEvent.ACTION_UP:
+                // Short tap: go Home. On Skylight this is a no-op
+                // (Skylight is the default launcher), in Android
+                // Settings it returns to the calendar. This is the
+                // escape route out of Settings, which has no
+                // on-screen Home/Back. If the 5s hold already fired,
+                // pressing is false here, so no Home is sent.
+                boolean wasPressing = pressing;
+                cancelHold();
+                if (wasPressing) {
+                    try {
+                        Intent home = new Intent(Intent.ACTION_MAIN);
+                        home.addCategory(Intent.CATEGORY_HOME);
+                        home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        getContext().startActivity(home);
+                    } catch (Exception ignored) {
+                    }
+                }
+                return true;
             case MotionEvent.ACTION_CANCEL:
                 cancelHold();
                 return true;

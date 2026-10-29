@@ -1,7 +1,7 @@
 # Skylight Escape Hatch
 
 Adds a small gear icon to the Skylight bottom bar, next to Sleep.
-Tap it: nothing. Hold it for 5 seconds: Android Settings opens.
+Tap it: return to Skylight. Hold it for 5 seconds: Android Settings opens.
 
 ## Install
 

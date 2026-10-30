@@ -12,11 +12,11 @@ apply plugin: 'com.android.application'
 // so local builds without secrets still work. No secret value is
 // ever in this file; the keystore file itself is ephemeral on the
 // CI runner and is never committed.
-def keystoreFile = System.getenv("KEYSTORE_FILE")
-def keystorePassword = System.getenv("KEYSTORE_PASSWORD")
-def keyAlias = System.getenv("KEY_ALIAS")
-def keyPassword = System.getenv("KEY_PASSWORD")
-def stableSigning = keystoreFile && keystorePassword && keyAlias && keyPassword
+def signingStoreFile = System.getenv("KEYSTORE_FILE")
+def signingStorePassword = System.getenv("KEYSTORE_PASSWORD")
+def signingKeyAlias = System.getenv("KEY_ALIAS")
+def signingKeyPassword = System.getenv("KEY_PASSWORD")
+def stableSigning = signingStoreFile && signingStorePassword && signingKeyAlias && signingKeyPassword
 
 android {
     namespace 'net.cogdev.skylightoverlay'
@@ -33,10 +33,10 @@ android {
     signingConfigs {
         if (stableSigning) {
             release {
-                storeFile file(keystoreFile)
-                storePassword keystorePassword
-                keyAlias keyAlias
-                keyPassword keyPassword
+                storeFile file(signingStoreFile)
+                storePassword signingStorePassword
+                keyAlias signingKeyAlias
+                keyPassword signingKeyPassword
             }
         }
     }

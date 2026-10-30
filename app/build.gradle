@@ -3,6 +3,21 @@
 // would fail to resolve the plugin; this form does not.
 apply plugin: 'com.android.application'
 
+// Stable signing: when CI supplies a keystore via environment
+// (KEYSTORE_FILE, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD, decoded
+// in the workflow from the KEYSTORE_BASE64 secret), use it for both
+// debug and release builds, so successive CI builds share one
+// signature and install over each other with grants intact.
+// Without those env vars, fall back to the default debug signing,
+// so local builds without secrets still work. No secret value is
+// ever in this file; the keystore file itself is ephemeral on the
+// CI runner and is never committed.
+def keystoreFile = System.getenv("KEYSTORE_FILE")
+def keystorePassword = System.getenv("KEYSTORE_PASSWORD")
+def keyAlias = System.getenv("KEY_ALIAS")
+def keyPassword = System.getenv("KEY_PASSWORD")
+def stableSigning = keystoreFile && keystorePassword && keyAlias && keyPassword
+
 android {
     namespace 'net.cogdev.skylightoverlay'
     compileSdk 33
@@ -15,12 +30,29 @@ android {
         versionName '0.1.0'
     }
 
+    signingConfigs {
+        if (stableSigning) {
+            release {
+                storeFile file(keystoreFile)
+                storePassword keystorePassword
+                keyAlias keyAlias
+                keyPassword keyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            if (stableSigning) {
+                signingConfig signingConfigs.release
+            }
         }
         debug {
             debuggable true
+            if (stableSigning) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 

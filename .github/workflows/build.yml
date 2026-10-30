@@ -23,8 +23,23 @@ jobs:
       # the obsolete "tools" package via sdkmanager, which fails with exit 1.
       # AGP finds the preinstalled SDK via ANDROID_HOME.
 
+      # Stable signing: decode the keystore from the KEYSTORE_BASE64
+      # secret to an ephemeral runner file. The file is never committed
+      # and the runner is discarded after the job. Secret values are
+      # passed only via env, never printed in the workflow.
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/skylight.keystore"
+
       - name: Build debug APK with Gradle
         uses: gradle/gradle-build-action@v3
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/skylight.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         with:
           gradle-version: '8.2'
           arguments: assembleDebug

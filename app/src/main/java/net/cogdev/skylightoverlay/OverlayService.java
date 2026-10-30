@@ -13,6 +13,8 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.WindowManager;
 
+import java.io.File;
+
 /**
  * Foreground service that owns the hatch overlay.
  *
@@ -39,6 +41,7 @@ public class OverlayService extends Service {
 
     private WindowManager windowManager;
     private HatchView hatchView;
+    private NtfyListener ntfyListener;
 
     @Override
     public void onCreate() {
@@ -46,10 +49,57 @@ public class OverlayService extends Service {
         windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
     }
 
+    private void startNtfyListener() {
+        if (ntfyListener != null) return;
+        String server = NtfyListener.savedServer(this);
+        String topic = NtfyListener.savedTopic(this);
+        String token = NtfyListener.savedToken(this);
+        ntfyListener = new NtfyListener(this, server, topic, token, new NtfyListener.Callback() {
+            @Override
+            public void onRenderHtml(String title, String html) {
+                Intent i = new Intent(OverlayService.this, RendererActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                i.putExtra(RendererActivity.EXTRA_TITLE, title);
+                i.putExtra(RendererActivity.EXTRA_HTML, html);
+                startActivity(i);
+            }
+
+            @Override
+            public void onRenderUrl(String title, String url) {
+                Intent i = new Intent(OverlayService.this, RendererActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                i.putExtra(RendererActivity.EXTRA_TITLE, title);
+                i.putExtra(RendererActivity.EXTRA_URL, url);
+                startActivity(i);
+            }
+
+            @Override
+            public void onRenderFile(String title, File file) {
+                Intent i = new Intent(OverlayService.this, RendererActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                i.putExtra(RendererActivity.EXTRA_TITLE, title);
+                i.putExtra(RendererActivity.EXTRA_FILE, file.getAbsolutePath());
+                startActivity(i);
+            }
+
+            @Override
+            public void onNotification(String level, String title, String message) {
+                Intent i = new Intent(OverlayService.this, RendererActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                i.putExtra(RendererActivity.EXTRA_TITLE, title);
+                i.putExtra(RendererActivity.EXTRA_HTML,
+                        RendererActivity.notificationHtml(level, title, message));
+                startActivity(i);
+            }
+        });
+        ntfyListener.start();
+    }
+
     @Override
     @SuppressWarnings("deprecation")
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(NOTIFICATION_ID, buildNotification());
+        startNtfyListener();
 
         if (hatchView == null) {
             DisplayMetrics metrics = new DisplayMetrics();
@@ -115,6 +165,10 @@ public class OverlayService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (ntfyListener != null) {
+            ntfyListener.stop();
+            ntfyListener = null;
+        }
         if (hatchView != null && windowManager != null) {
             try {
                 windowManager.removeView(hatchView);

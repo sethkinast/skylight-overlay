@@ -4,6 +4,7 @@
     <!-- Draw over other apps: granted once via adb, see README.
          This is the whole point of the app: an overlay icon on Skylight's
          bottom bar. Without it the service can run but cannot draw. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

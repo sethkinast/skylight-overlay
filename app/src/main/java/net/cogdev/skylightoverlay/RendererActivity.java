@@ -4,6 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
@@ -29,6 +34,24 @@ public class RendererActivity extends Activity {
 
     public static final String EXTRA_ASSET = "asset";
     public static final String EXTRA_TITLE = "title";
+    public static final String EXTRA_FILE = "file";
+    public static final String EXTRA_HTML = "html";
+    public static final String EXTRA_URL = "url";
+
+    public static String notificationHtml(String level, String title, String message) {
+        String badge = level != null && level.equals("urgent") ? "URGENT" : "STANDARD";
+        return "<!DOCTYPE html><html><head><meta charset=\"utf-8\">"
+                + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+                + "<style>body{font-family:sans-serif;padding:24px;font-size:26px;line-height:1.5;color:#111;}"
+                + "h1{font-size:38px;} .badge{display:inline-block;padding:8px 16px;font-size:22px;font-weight:bold;"
+                + "background:" + (badge.equals("URGENT") ? "#c62828;color:#fff;" : "#eee;") + "}"
+                + "</style></head><body>"
+                + "<span class=\"badge\">" + badge + "</span>"
+                + "<h1>" + NtfyListener.escapeHtml(title) + "</h1>"
+                + "<p>" + NtfyListener.escapeHtml(message).replace("\n", "<br>") + "</p>"
+                + "<p>Close this with the Close button above.</p>"
+                + "</body></html>";
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +111,40 @@ public class RendererActivity extends Activity {
         root.addView(webView);
 
         setContentView(root);
-        webView.loadUrl("file:///android_asset/" + asset);
+        String filePath = intent != null ? intent.getStringExtra(EXTRA_FILE) : null;
+        String html = intent != null ? intent.getStringExtra(EXTRA_HTML) : null;
+        String url = intent != null ? intent.getStringExtra(EXTRA_URL) : null;
+        if (filePath != null && !filePath.isEmpty()) {
+            String content = readFile(filePath);
+            if (content != null) {
+                webView.loadDataWithBaseURL(null, content, "text/html", "UTF-8", null);
+            } else {
+                webView.loadDataWithBaseURL(null,
+                        notificationHtml("standard", titleText, "Could not read the delivered file."),
+                        "text/html", "UTF-8", null);
+            }
+        } else if (html != null && !html.isEmpty()) {
+            webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
+        } else if (url != null && !url.isEmpty()) {
+            webView.loadUrl(url);
+        } else {
+            webView.loadUrl("file:///android_asset/" + asset);
+        }
+    }
+
+    private String readFile(String path) {
+        try {
+            BufferedReader r = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(new File(path)), "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = r.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            r.close();
+            return sb.toString();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

@@ -24,7 +24,10 @@ import android.widget.TextView;
  * Native chrome only: a fixed title bar with an explicit Close button.
  * Nothing in the WebView content closes this activity — taps and
  * scrolls stay inside the page, which is what a cooking artifact needs.
- * Close finishes the activity, returning to Skylight (the launcher).
+ * Close returns to Skylight (the launcher) via an explicit HOME intent,
+ * not just finish(): MainActivity is often underneath in the task
+ * (opened to configure ntfy), and a plain finish() would reveal it
+ * instead of Skylight.
  *
  * v1 loads a bundled asset (e.g. red-pepper-chicken.html). A later
  * push step will load dynamically delivered HTML through the same
@@ -93,7 +96,7 @@ public class RendererActivity extends Activity {
         close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                goHome();
             }
         });
         chrome.addView(close);
@@ -130,6 +133,20 @@ public class RendererActivity extends Activity {
         } else {
             webView.loadUrl("file:///android_asset/" + asset);
         }
+    }
+
+    private void goHome() {
+        Intent home = new Intent(Intent.ACTION_MAIN);
+        home.addCategory(Intent.CATEGORY_HOME);
+        home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(home);
+        finish();
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void onBackPressed() {
+        goHome();
     }
 
     private String readFile(String path) {

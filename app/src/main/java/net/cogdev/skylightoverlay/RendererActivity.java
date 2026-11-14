@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
@@ -19,7 +21,23 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * Fullscreen artifact renderer.
+ * Artifact renderer, in two modes.
+ *
+ * FULLSCREEN (default): covers the whole screen. Used for pushed
+ * content — recipes, notifications — where the page is an
+ * interruption and Close is the way back.
+ *
+ * PAGE (EXTRA_PAGE = true): covers everything *except* the menu
+ * bar. The window is sized to the top 95.78% of the screen
+ * (MenuBarView.BAR_TOP) and pinned to the top, and tapping
+ * outside the window — i.e. on the menu bar — finishes it.
+ * That is the point: the bar stays visible and tappable while
+ * a page is open, and the Calendar button on it is the way back
+ * to Skylight. The page takes the taps everywhere above the bar.
+ * Whether that outside tap also selects the native tab underneath
+ * is device behaviour to verify on the Max; closing alone returns
+ * to Skylight, which was on Calendar when the page opened, so
+ * Calendar is the tab you land on either way.
  *
  * Native chrome only: a fixed title bar with an explicit Close button.
  * Nothing in the WebView content closes this activity — taps and
@@ -40,6 +58,7 @@ public class RendererActivity extends Activity {
     public static final String EXTRA_FILE = "file";
     public static final String EXTRA_HTML = "html";
     public static final String EXTRA_URL = "url";
+    public static final String EXTRA_PAGE = "page";
 
     public static String notificationHtml(String level, String title, String message) {
         String badge = level != null && level.equals("urgent") ? "URGENT" : "STANDARD";
@@ -61,6 +80,19 @@ public class RendererActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
+        boolean pageMode = intent != null && intent.getBooleanExtra(EXTRA_PAGE, false);
+        if (pageMode) {
+            // Page mode: window covers everything except the menu bar.
+            // Height is the bar top (95.78% of screen height), pinned
+            // to the top. A tap outside the window — on the menu bar —
+            // finishes this activity, returning to Skylight underneath.
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            int pageHeight = (int) (metrics.heightPixels * MenuBarView.BAR_TOP);
+            getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, pageHeight);
+            getWindow().setGravity(Gravity.TOP);
+            setFinishOnTouchOutside(true);
+        }
+
         String asset = intent != null ? intent.getStringExtra(EXTRA_ASSET) : null;
         if (asset == null || asset.isEmpty()) {
             asset = "red-pepper-chicken.html";

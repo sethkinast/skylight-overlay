@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Handler;
@@ -43,7 +44,8 @@ import android.view.View;
 public class MenuButtonView extends View {
 
     public enum Icon {
-        GEAR
+        GEAR,
+        BANK
         // Future icons go here, drawn in the same outline style
         // and colour as the native bar icons.
     }
@@ -56,6 +58,7 @@ public class MenuButtonView extends View {
     private static final int RING_COLOR = Color.rgb(42, 127, 255);
 
     private final Paint iconPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint outlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint centrePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint labelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint ringBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -124,6 +127,11 @@ public class MenuButtonView extends View {
         setClickable(true);
         iconPaint.setColor(ICON_COLOR);
         iconPaint.setStyle(Paint.Style.FILL);
+        outlinePaint.setColor(ICON_COLOR);
+        outlinePaint.setStyle(Paint.Style.STROKE);
+        outlinePaint.setStrokeWidth(2.5f * getResources().getDisplayMetrics().density);
+        outlinePaint.setStrokeCap(Paint.Cap.ROUND);
+        outlinePaint.setStrokeJoin(Paint.Join.ROUND);
         centrePaint.setColor(BAR_COLOR);
         centrePaint.setStyle(Paint.Style.FILL);
 
@@ -174,6 +182,23 @@ public class MenuButtonView extends View {
             canvas.drawCircle(0, 0, outer, iconPaint);
             canvas.drawCircle(0, 0, inner, centrePaint);
             canvas.restore();
+        } else if (icon == Icon.BANK) {
+            // Outline bank: triangular roof, three columns, base line.
+            // Drawn in stroke, like the native outline icons, so it
+            // reads closer to them than the filled gear does.
+            Path roof = new Path();
+            roof.moveTo(cx - outer - 2f, iconCy - outer * 0.15f);
+            roof.lineTo(cx, iconCy - outer - 2f);
+            roof.lineTo(cx + outer + 2f, iconCy - outer * 0.15f);
+            roof.close();
+            canvas.drawPath(roof, outlinePaint);
+            float colTop = iconCy + outer * 0.05f;
+            float colBottom = iconCy + outer * 0.85f;
+            for (float dx : new float[]{-outer * 0.6f, 0f, outer * 0.6f}) {
+                canvas.drawLine(cx + dx, colTop, cx + dx, colBottom, outlinePaint);
+            }
+            canvas.drawLine(cx - outer - 2f, colBottom + 2f,
+                    cx + outer + 2f, colBottom + 2f, outlinePaint);
         }
 
         // Progress ring, only while holding, sized to the icon.

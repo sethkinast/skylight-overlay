@@ -29,7 +29,10 @@ import java.io.File;
  *
  * Registered buttons, in slot order (see MenuBarView.register):
  *   1. Hatch — tap: Home; hold 5s: Android Settings.
- * Slots 2-4 are blank cover for now, ready for family buttons.
+ *   2. BanKin — tap: open the kids' bank webapp in the renderer
+ *      in page mode (top 95.78% of the screen, menu bar left
+ *      visible and tappable; tapping the bar closes the page).
+ * Slots 3-4 are blank cover for now, ready for family buttons.
  */
 public class OverlayService extends Service {
 
@@ -141,6 +144,19 @@ public class OverlayService extends Service {
                             startActivity(intent);
                         }
                     });
+            menuBarView.register("BanKin", MenuButtonView.Icon.BANK,
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent i = new Intent(OverlayService.this, RendererActivity.class);
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            i.putExtra(RendererActivity.EXTRA_TITLE, "BanKin");
+                            i.putExtra(RendererActivity.EXTRA_URL, "https://bankin.home.kina.st");
+                            i.putExtra(RendererActivity.EXTRA_PAGE, true);
+                            startActivity(i);
+                        }
+                    },
+                    null);
             try {
                 windowManager.addView(menuBarView, params);
             } catch (Exception e) {

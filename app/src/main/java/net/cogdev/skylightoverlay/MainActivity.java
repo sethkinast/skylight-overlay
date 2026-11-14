@@ -42,7 +42,10 @@ public class MainActivity extends Activity {
                 "Hatch button in Skylight's bottom menu bar (first of the\n"
                         + "four covered slots, where Rewards used to be).\n"
                         + "Tap Hatch: return to Skylight (Home).\n"
-                        + "Hold Hatch 5 seconds: opens Android Settings.\n\n"
+                        + "Hold Hatch 5 seconds: opens Android Settings.\n"
+                        + "Tap BanKin: opens the kids' bank in page mode —\n"
+                        + "top of the screen, menu bar still visible;\n"
+                        + "tap the Calendar button on the bar to go back.\n\n"
                         + "First grant Draw over other apps, then Start.");
         body.setPadding(0, pad, 0, pad);
         layout.addView(body);

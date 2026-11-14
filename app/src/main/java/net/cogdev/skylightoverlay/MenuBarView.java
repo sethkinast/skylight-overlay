@@ -35,7 +35,8 @@ import java.util.List;
  *
  * Currently registered, in order:
  *   1. Hatch — tap: Home; hold 5s: Android Settings.
- * Slots 2-4 are blank cover, ready for the family buttons that
+ *   2. BanKin — tap: open the kids' bank webapp in page mode.
+ * Slots 3-4 are blank cover, ready for the family buttons that
  * will replace Skylight functions (lunch, dinner, etc.).
  */
 public class MenuBarView extends LinearLayout {

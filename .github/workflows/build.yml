@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Release upload below needs write access to contents.
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -50,3 +54,17 @@ jobs:
           name: skylight-escape-hatch-debug
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      # GitHub always downloads artifacts as a zip, so the artifact
+      # alone can never be a direct APK download. Also publish the
+      # APK as an asset on a rolling "latest" release, which GitHub
+      # serves as a plain .apk file: Releases > Latest CI build >
+      # app-debug.apk. The artifact upload above is kept for CI history.
+      - name: Publish APK as release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest CI build
+          prerelease: true
+          files: app/build/outputs/apk/debug/app-debug.apk
+          fail_on_unmatched_files: true

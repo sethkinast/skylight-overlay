@@ -39,9 +39,10 @@ public class MainActivity extends Activity {
 
         TextView body = new TextView(this);
         body.setText(
-                "Gear icon next to Sleep on Skylight's bottom bar.\n"
-                        + "Tap: return to Skylight (Home).\n"
-                        + "Hold 5 seconds: opens Android Settings.\n\n"
+                "Hatch button in Skylight's bottom menu bar (first of the\n"
+                        + "four covered slots, where Rewards used to be).\n"
+                        + "Tap Hatch: return to Skylight (Home).\n"
+                        + "Hold Hatch 5 seconds: opens Android Settings.\n\n"
                         + "First grant Draw over other apps, then Start.");
         body.setPadding(0, pad, 0, pad);
         layout.addView(body);

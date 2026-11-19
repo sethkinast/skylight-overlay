@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Renderer theme: translucent, so the activity underneath
+         (Skylight) stays alive and keeps drawing in the area this
+         activity's window does not cover. Without this, the app
+         theme is opaque, the system stops Skylight when the
+         renderer is on top, and the uncovered menu-bar strip
+         renders black instead of Skylight's bar (seen 2026-11-19
+         in BanKin page mode). The renderer's own content root
+         still has an opaque white background, so the page area
+         itself is solid in both fullscreen and page modes. -->
+    <style name="RendererTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

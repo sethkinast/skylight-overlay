@@ -26,6 +26,13 @@ import android.view.View;
  * - icon/label colour, unselected: #6E7275 (110,114,117);
  *   selected (Calendar) is black bold on a white cell
  * - label size is ~11sp by that cap height
+ * - icons are thin outlines: stroke ~1.5dp. The old filled gear
+ *   and 2.5dp strokes stood out as much heavier (2026-11-19).
+ *
+ * The bar itself is no longer covered (Skylight update, 2026-11-19:
+ * native icons can be hidden in Skylight settings, so there is
+ * nothing to hide). Buttons are drawn on the transparent overlay,
+ * with the native bar background showing through.
  *
  * Font: the native label font could not be identified definitively
  * from the screenshot alone — it reads as a rounded humanist sans,
@@ -52,14 +59,11 @@ public class MenuButtonView extends View {
 
     public static final long DEFAULT_HOLD_MS = 5000L;
 
-    private static final int BAR_COLOR = Color.rgb(233, 241, 247);
     private static final int ICON_COLOR = Color.rgb(110, 114, 117);
     private static final int LABEL_COLOR = Color.rgb(110, 114, 117);
     private static final int RING_COLOR = Color.rgb(42, 127, 255);
 
-    private final Paint iconPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint outlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint centrePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint labelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint ringBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint ringPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -125,15 +129,15 @@ public class MenuButtonView extends View {
 
     private void init() {
         setClickable(true);
-        iconPaint.setColor(ICON_COLOR);
-        iconPaint.setStyle(Paint.Style.FILL);
+        // Thin outline stroke, matching the native icons. The old
+        // filled gear (and the 2.5dp bank stroke) stood out as much
+        // heavier than the native outline icons (seen 2026-11-19);
+        // native stroke is ~1.5dp at this density.
         outlinePaint.setColor(ICON_COLOR);
         outlinePaint.setStyle(Paint.Style.STROKE);
-        outlinePaint.setStrokeWidth(2.5f * getResources().getDisplayMetrics().density);
+        outlinePaint.setStrokeWidth(1.5f * getResources().getDisplayMetrics().density);
         outlinePaint.setStrokeCap(Paint.Cap.ROUND);
         outlinePaint.setStrokeJoin(Paint.Join.ROUND);
-        centrePaint.setColor(BAR_COLOR);
-        centrePaint.setStyle(Paint.Style.FILL);
 
         labelPaint.setColor(LABEL_COLOR);
         labelPaint.setTypeface(Typeface.SANS_SERIF);
@@ -168,19 +172,22 @@ public class MenuButtonView extends View {
         float inner = outer * 0.45f;
 
         if (icon == Icon.GEAR) {
+            // Outline gear, like the native Settings gear: two
+            // concentric circles plus eight short radial teeth.
+            // No fill — the native bar background shows through,
+            // which is the whole point now that Skylight lets you
+            // hide the native icons instead of us covering them.
             canvas.save();
             canvas.translate(cx, iconCy);
-            float toothW = outer * 0.28f;
-            float toothH = outer * 0.30f;
+            canvas.drawCircle(0, 0, outer, outlinePaint);
+            canvas.drawCircle(0, 0, inner, outlinePaint);
+            float toothLen = outer * 0.30f;
             for (int i = 0; i < 8; i++) {
                 canvas.save();
                 canvas.rotate(i * 45f);
-                canvas.drawRect(-toothW / 2f, -outer - toothH * 0.5f,
-                        toothW / 2f, -outer + toothH * 0.5f, iconPaint);
+                canvas.drawLine(0, -outer, 0, -outer - toothLen, outlinePaint);
                 canvas.restore();
             }
-            canvas.drawCircle(0, 0, outer, iconPaint);
-            canvas.drawCircle(0, 0, inner, centrePaint);
             canvas.restore();
         } else if (icon == Icon.BANK) {
             // Outline bank: triangular roof, three columns, base line.

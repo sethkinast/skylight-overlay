@@ -21,8 +21,12 @@ import java.io.File;
  * Position is computed from relative fractions measured from the
  * 2026-10-29 screenshot (portrait, 1440x2560, wall orientation), not
  * hardcoded pixels, so it survives a Skylight UI shift that keeps the
- * same relative layout. See MenuBarView for the measured cover
- * region: Rewards through Photos, x 30.0%-60.2%, bar top 95.78%.
+ * same relative layout. See MenuBarView for the measured region:
+ * Rewards through Photos, x 30.0%-60.2%, bar top 95.78%.
+ *
+ * No cover any more: Skylight's update lets you hide the native
+ * icons, so the overlay is transparent (PixelFormat.TRANSLUCENT)
+ * and only draws the registered buttons, on the native bar.
  *
  * The touch area is deliberately kept inside the bar: extending above
  * it would intercept taps on the calendar's bottom row.
@@ -32,7 +36,7 @@ import java.io.File;
  *   2. BanKin — tap: open the kids' bank webapp in the renderer
  *      in page mode (top 95.78% of the screen, menu bar left
  *      visible and tappable; tapping the bar closes the page).
- * Slots 3-4 are blank cover for now, ready for family buttons.
+ * Slots 3-4 are blank for now, ready for family buttons.
  */
 public class OverlayService extends Service {
 
@@ -120,7 +124,7 @@ public class OverlayService extends Service {
                             : WindowManager.LayoutParams.TYPE_PHONE,
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                    PixelFormat.OPAQUE);
+                    PixelFormat.TRANSLUCENT);
             params.gravity = Gravity.TOP | Gravity.START;
             params.x = left;
             params.y = top;

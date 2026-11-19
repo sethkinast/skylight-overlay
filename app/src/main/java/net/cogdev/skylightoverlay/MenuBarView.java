@@ -19,13 +19,14 @@ import java.util.List;
  *   Home 54, Calendar 162, Lists 270, Tasks 378, Rewards 486,
  *   Meals 594, Recipes 702, Photos 810, Sleep 1278, Settings 1386
  * - the four middle items, Rewards through Photos, occupy
- *   x 432-864px = 30.0%-60.2% of width. That is the covered region.
+ *   x 432-864px = 30.0%-60.2% of width. That was the covered region.
  *
- * This view is exactly that region, opaque in the bar colour, so
- * the four native items underneath are hidden and untappable, and
- * the bar still reads as one continuous bar. Unfilled slots are
- * blank, clickable spacers in the same colour, so they still block
- * the native item underneath.
+ * No cover any more (Skylight update, 2026-11-19: native icons
+ * can be hidden in Skylight settings, so there is nothing to
+ * hide). This view is transparent — the native bar background
+ * shows through — and it only draws the buttons we register.
+ * Unfilled slots are transparent, non-clickable spacers, so
+ * taps there pass through to the native bar underneath.
  *
  * Registering a button — the infra Seth asked for:
  *   menuBar.register("Lunch", MenuButtonView.Icon.GEAR, tap, longPress);
@@ -36,7 +37,7 @@ import java.util.List;
  * Currently registered, in order:
  *   1. Hatch — tap: Home; hold 5s: Android Settings.
  *   2. BanKin — tap: open the kids' bank webapp in page mode.
- * Slots 3-4 are blank cover, ready for the family buttons that
+ * Slots 3-4 are blank, ready for the family buttons that
  * will replace Skylight functions (lunch, dinner, etc.).
  */
 public class MenuBarView extends LinearLayout {
@@ -45,8 +46,6 @@ public class MenuBarView extends LinearLayout {
     public static final float COVER_LEFT = 0.300f;
     public static final float COVER_RIGHT = 0.602f;
     public static final float BAR_TOP = 0.9578f;
-
-    private static final int BAR_COLOR = Color.rgb(233, 241, 247);
 
     private static class Entry {
         final String label;
@@ -67,7 +66,7 @@ public class MenuBarView extends LinearLayout {
     public MenuBarView(Context context) {
         super(context);
         setOrientation(HORIZONTAL);
-        setBackgroundColor(BAR_COLOR);
+        setBackgroundColor(Color.TRANSPARENT);
         rebuild();
     }
 
@@ -87,12 +86,13 @@ public class MenuBarView extends LinearLayout {
             LayoutParams lp = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1f);
             addView(button, lp);
         }
-        // Blank cover for the remaining slots, so the native items
-        // underneath stay hidden and untappable.
+        // Blank slots: transparent and not clickable, so taps
+        // pass through to the native bar underneath (nothing
+        // is hidden any more — see the class comment).
         for (int i = entries.size(); i < MAX_BUTTONS; i++) {
             View spacer = new View(getContext());
-            spacer.setBackgroundColor(BAR_COLOR);
-            spacer.setClickable(true);
+            spacer.setBackgroundColor(Color.TRANSPARENT);
+            spacer.setClickable(false);
             LayoutParams lp = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1f);
             addView(spacer, lp);
         }

@@ -27,6 +27,7 @@
 
         <activity
             android:name=".RendererActivity"
+            android:theme="@style/RendererTheme"
             android:exported="true" />
 
         <service

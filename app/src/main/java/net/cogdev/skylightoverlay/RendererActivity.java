@@ -39,6 +39,13 @@ import android.widget.TextView;
  * to Skylight, which was on Calendar when the page opened, so
  * Calendar is the tab you land on either way.
  *
+ * Page mode needs the translucent RendererTheme (styles.xml):
+ * with the old opaque app theme, the system stopped Skylight
+ * while the renderer was on top, so the uncovered bar strip
+ * rendered black instead of Skylight's bar (seen 2026-11-19
+ * in BanKin page mode). The content root below is opaque white,
+ * so the page area itself stays solid.
+ *
  * Native chrome only: a fixed title bar with an explicit Close button.
  * Nothing in the WebView content closes this activity — taps and
  * scrolls stay inside the page, which is what a cooking artifact needs.
@@ -104,6 +111,9 @@ public class RendererActivity extends Activity {
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
+        // Opaque white: the theme is translucent (see styles.xml),
+        // so without this the page area would show Skylight through.
+        root.setBackgroundColor(android.graphics.Color.WHITE);
         root.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));

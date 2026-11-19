@@ -25,7 +25,14 @@ import android.widget.TextView;
  *
  * FULLSCREEN (default): covers the whole screen. Used for pushed
  * content — recipes, notifications — where the page is an
- * interruption and Close is the way back.
+ * interruption and Close is the way back. The content still
+ * reserves the bottom menu-bar strip (4.22% of screen height,
+ * white): the menu-bar overlay (Hatch / BanKin) draws on top
+ * of this activity, and without the reserved strip the WebView
+ * content runs under its icons — seen 2026-11-19 on the
+ * Hibachi recipe, where Hatch / BanKin sat on top of step 4's
+ * text. So the WebView ends at the bar top, and the strip
+ * below it is the overlay's space.
  *
  * PAGE (EXTRA_PAGE = true): covers everything *except* the menu
  * bar. Retained as a fallback only — tabs now use
@@ -157,6 +164,26 @@ public class RendererActivity extends Activity {
         settings.setMediaPlaybackRequiresUserGesture(false);
         webView.setWebViewClient(new WebViewClient());
         root.addView(webView);
+
+        if (!pageMode) {
+            // Reserve the bottom menu-bar strip for the menu-bar
+            // overlay (Hatch / BanKin), which draws on top of
+            // this activity. Without it, WebView content runs
+            // under the overlay icons — seen 2026-11-19 on the
+            // Hibachi recipe, where they sat on step 4's text.
+            // The strip is opaque white; the native bar is hidden
+            // behind this activity, so the overlay's two buttons
+            // are what show there.
+            DisplayMetrics spacerMetrics = getResources().getDisplayMetrics();
+            int barHeight = spacerMetrics.heightPixels
+                    - (int) (spacerMetrics.heightPixels * MenuBarView.BAR_TOP);
+            View spacer = new View(this);
+            spacer.setBackgroundColor(android.graphics.Color.WHITE);
+            LinearLayout.LayoutParams spacerParams = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, barHeight);
+            spacer.setLayoutParams(spacerParams);
+            root.addView(spacer);
+        }
 
         setContentView(root);
         String filePath = intent != null ? intent.getStringExtra(EXTRA_FILE) : null;

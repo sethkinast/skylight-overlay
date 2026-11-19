@@ -46,35 +46,58 @@ public class OverlayService extends Service {
 
     private WindowManager windowManager;
     private MenuBarView menuBarView;
-    private WindowManager.LayoutParams menuBarParams;
     private PageOverlayView pageView;
     private NtfyListener ntfyListener;
 
     /**
      * Show a page as a true overlay (no activity switch).
+     * The page window is pre-added at service start, below
+     * the menu bar, and hidden with GONE — showing it is just
+     * visibility + load, with no add/remove, so the menu bar
+     * never flickers (the old remove/re-add on every BanKin
+     * tap made it briefly disappear, seen 2026-11-19).
      * Skylight stays the foreground activity; this window sits
      * on top of it for the top 95.78% of the screen, and the
-     * menu bar stays live underneath. The menu-bar overlay is
-     * re-added on top of the page window, so Hatch / BanKin
-     * stay tappable while a page is open.
+     * menu bar stays live underneath.
      */
     private void showPage(String title, String url) {
-        if (pageView != null) {
-            pageView.loadUrl(url);
-            return;
-        }
+        if (pageView == null) return;
+        pageView.setTitle(title);
+        pageView.loadUrl(url);
+        pageView.setVisibility(android.view.View.VISIBLE);
+    }
+
+    private void hidePage() {
+        if (pageView == null) return;
+        pageView.setVisibility(android.view.View.GONE);
+    }
+
+    /** Pre-add the page window, below the menu bar, hidden. */
+    private void ensurePageView() {
+        if (pageView != null) return;
         DisplayMetrics metrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getRealMetrics(metrics);
         int barHeight = metrics.heightPixels - (int) (metrics.heightPixels * MenuBarView.BAR_TOP);
 
-        final PageOverlayView view = new PageOverlayView(this, title, url,
+        PageOverlayView view = new PageOverlayView(this, "", null,
                 new Runnable() {
                     @Override
                     public void run() {
                         hidePage();
                     }
+                },
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        hidePage();
+                        Intent home = new Intent(Intent.ACTION_MAIN);
+                        home.addCategory(Intent.CATEGORY_HOME);
+                        home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(home);
+                    }
                 });
         view.setBarHeight(barHeight);
+        view.setVisibility(android.view.View.GONE);
 
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -91,28 +114,9 @@ public class OverlayService extends Service {
         try {
             windowManager.addView(view, params);
             pageView = view;
-        } catch (Exception e) {
-            return;
-        }
-        // Re-add the menu bar on top of the page window, so
-        // Hatch / BanKin stay tappable while a page is open.
-        if (menuBarView != null && menuBarParams != null) {
-            try {
-                windowManager.removeView(menuBarView);
-                windowManager.addView(menuBarView, menuBarParams);
-            } catch (Exception ignored) {
-            }
-        }
-    }
-
-    private void hidePage() {
-        if (pageView == null) return;
-        try {
-            windowManager.removeView(pageView);
         } catch (Exception ignored) {
+            pageView = null;
         }
-        pageView.destroyWebView();
-        pageView = null;
     }
 
     @Override
@@ -176,6 +180,10 @@ public class OverlayService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(NOTIFICATION_ID, buildNotification());
         startNtfyListener();
+        // Page window first, so the menu bar added after it
+        // sits on top of it. See showPage() for why it is
+        // pre-added instead of added on every BanKin tap.
+        ensurePageView();
 
         if (menuBarView == null) {
             DisplayMetrics metrics = new DisplayMetrics();
@@ -200,7 +208,6 @@ public class OverlayService extends Service {
             params.gravity = Gravity.TOP | Gravity.START;
             params.x = left;
             params.y = top;
-            menuBarParams = params;
 
             menuBarView = new MenuBarView(this);
             menuBarView.register("Hatch", MenuButtonView.Icon.GEAR,
@@ -270,7 +277,14 @@ public class OverlayService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        hidePage();
+        if (pageView != null && windowManager != null) {
+            try {
+                windowManager.removeView(pageView);
+            } catch (Exception ignored) {
+            }
+            pageView.destroyWebView();
+            pageView = null;
+        }
         if (ntfyListener != null) {
             ntfyListener.stop();
             ntfyListener = null;

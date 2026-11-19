@@ -33,26 +33,32 @@ import android.widget.TextView;
  *   renderer's chrome), height wrap-content
  * - WebView: fills the rest of the top 95.78% of the screen
  * - bottom strip: transparent, exactly the menu-bar height.
- *   A touch there hides this page and returns false, so the
- *   touch falls through to Skylight underneath — that is how
- *   tapping the Calendar button on the bar closes the page.
- *   If the fall-through does not happen on this device, the
- *   page still closes, and Skylight was on Calendar when the
- *   page opened, so a second tap selects the tab if needed.
+ *   A touch there hides this page. It returns false, in the
+ *   hope the touch falls through to Skylight underneath — but
+ *   on the Max it does not: the tap is consumed (confirmed
+ *   2026-11-19). So a bar tap closes the page, and the user
+ *   taps again to select the tab. Except Home / Calendar
+ *   (leftmost 15% of the width): those taps also fire onHome,
+ *   which sends a HOME intent, landing on Calendar — the tab
+ *   Skylight was on when the page opened.
  *
- * The menu-bar overlay is re-added on top of this window by
- * OverlayService, so Hatch / BanKin stay tappable while a
- * page is open. Taps on Hatch / BanKin hit that window first
- * and never reach this view's bottom strip.
+ * The menu-bar overlay sits on top of this window (it is added
+ * after it — see OverlayService), so Hatch / BanKin stay
+ * tappable while a page is open. Taps on Hatch / BanKin hit
+ * that window first and never reach this view's bottom strip.
  */
 public class PageOverlayView extends LinearLayout {
 
     private final WebView webView;
+    private final TextView titleView;
     private final Runnable onClose;
+    private final Runnable onHome;
 
-    public PageOverlayView(Context context, String titleText, String url, Runnable onClose) {
+    public PageOverlayView(Context context, String titleText, String url,
+                           Runnable onClose, Runnable onHome) {
         super(context);
         this.onClose = onClose;
+        this.onHome = onHome;
         setOrientation(VERTICAL);
         setBackgroundColor(Color.TRANSPARENT);
         setLayoutParams(new LayoutParams(
@@ -68,6 +74,7 @@ public class PageOverlayView extends LinearLayout {
 
         TextView title = new TextView(context);
         title.setText(titleText);
+        titleView = title;
         title.setTextSize(22f);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
@@ -125,15 +132,31 @@ public class PageOverlayView extends LinearLayout {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    if (onClose != null) {
+                    // Home (0-108px) and Calendar (108-216px) are
+                    // the leftmost 15% of the 1440px-wide bar.
+                    // Those taps close the page *and* go Home, so
+                    // a Calendar tap lands on Calendar in one tap.
+                    // Other bar taps just close the page; the tap
+                    // itself is consumed, so the tab needs a
+                    // second tap to select it (confirmed 2026-11-19:
+                    // returning false does not pass it through).
+                    float homeEdge = v.getWidth() * 0.15f;
+                    if (event.getX() < homeEdge && onHome != null) {
+                        onHome.run();
+                    } else if (onClose != null) {
                         onClose.run();
                     }
                 }
-                // Do not consume: let Skylight underneath have it.
                 return false;
             }
         });
         addView(strip);
+    }
+
+    public void setTitle(String titleText) {
+        if (titleText != null) {
+            titleView.setText(titleText);
+        }
     }
 
     public void loadUrl(String url) {

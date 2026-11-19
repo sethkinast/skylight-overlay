@@ -48,6 +48,8 @@ public class OverlayService extends Service {
     private MenuBarView menuBarView;
     private PageOverlayView pageView;
     private NtfyListener ntfyListener;
+    private final android.os.Handler mainHandler =
+            new android.os.Handler(android.os.Looper.getMainLooper());
 
     /**
      * Show a page as a true overlay (no activity switch).
@@ -59,17 +61,48 @@ public class OverlayService extends Service {
      * Skylight stays the foreground activity; this window sits
      * on top of it for the top 95.78% of the screen, and the
      * menu bar stays live underneath.
+     *
+     * View work is posted to the main thread: ntfy callbacks
+     * arrive on the listener's background thread, and touching
+     * a View from there throws.
      */
-    private void showPage(String title, String url) {
-        if (pageView == null) return;
-        pageView.setTitle(title);
-        pageView.loadUrl(url);
-        pageView.setVisibility(android.view.View.VISIBLE);
+    private void showPage(final String title, final String url) {
+        Runnable work = new Runnable() {
+            @Override
+            public void run() {
+                if (pageView == null) return;
+                pageView.setTitle(title);
+                pageView.loadUrl(url);
+                pageView.setVisibility(android.view.View.VISIBLE);
+                if (menuBarView != null) {
+                    menuBarView.setActive(title);
+                }
+            }
+        };
+        runOnMain(work);
     }
 
     private void hidePage() {
-        if (pageView == null) return;
-        pageView.setVisibility(android.view.View.GONE);
+        Runnable work = new Runnable() {
+            @Override
+            public void run() {
+                if (pageView == null) return;
+                pageView.setVisibility(android.view.View.GONE);
+                if (menuBarView != null) {
+                    menuBarView.setActive(null);
+                }
+            }
+        };
+        runOnMain(work);
+    }
+
+    /** Run now if already on the main thread, else post there. */
+    private void runOnMain(Runnable work) {
+        if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+            work.run();
+        } else {
+            mainHandler.post(work);
+        }
     }
 
     /** Pre-add the page window, below the menu bar, hidden. */
@@ -84,16 +117,6 @@ public class OverlayService extends Service {
                     @Override
                     public void run() {
                         hidePage();
-                    }
-                },
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        hidePage();
-                        Intent home = new Intent(Intent.ACTION_MAIN);
-                        home.addCategory(Intent.CATEGORY_HOME);
-                        home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(home);
                     }
                 });
         view.setBarHeight(barHeight);

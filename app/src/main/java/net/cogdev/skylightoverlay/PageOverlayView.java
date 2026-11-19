@@ -37,10 +37,7 @@ import android.widget.TextView;
  *   hope the touch falls through to Skylight underneath — but
  *   on the Max it does not: the tap is consumed (confirmed
  *   2026-11-19). So a bar tap closes the page, and the user
- *   taps again to select the tab. Except Home / Calendar
- *   (leftmost 15% of the width): those taps also fire onHome,
- *   which sends a HOME intent, landing on Calendar — the tab
- *   Skylight was on when the page opened.
+ *   taps again to select the tab.
  *
  * The menu-bar overlay sits on top of this window (it is added
  * after it — see OverlayService), so Hatch / BanKin stay
@@ -52,13 +49,11 @@ public class PageOverlayView extends LinearLayout {
     private final WebView webView;
     private final TextView titleView;
     private final Runnable onClose;
-    private final Runnable onHome;
 
     public PageOverlayView(Context context, String titleText, String url,
-                           Runnable onClose, Runnable onHome) {
+                           Runnable onClose) {
         super(context);
         this.onClose = onClose;
-        this.onHome = onHome;
         setOrientation(VERTICAL);
         setBackgroundColor(Color.TRANSPARENT);
         setLayoutParams(new LayoutParams(
@@ -132,18 +127,14 @@ public class PageOverlayView extends LinearLayout {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    // Home (0-108px) and Calendar (108-216px) are
-                    // the leftmost 15% of the 1440px-wide bar.
-                    // Those taps close the page *and* go Home, so
-                    // a Calendar tap lands on Calendar in one tap.
-                    // Other bar taps just close the page; the tap
-                    // itself is consumed, so the tab needs a
-                    // second tap to select it (confirmed 2026-11-19:
-                    // returning false does not pass it through).
-                    float homeEdge = v.getWidth() * 0.15f;
-                    if (event.getX() < homeEdge && onHome != null) {
-                        onHome.run();
-                    } else if (onClose != null) {
+                    // Close the page. The tap itself is consumed
+                    // (confirmed 2026-11-19: returning false does
+                    // not pass it through to Skylight), so the tab
+                    // needs a second tap to select it. An earlier
+                    // version also sent a HOME intent here for
+                    // Home / Calendar taps; it had no visible
+                    // effect, so it was removed (2026-11-19).
+                    if (onClose != null) {
                         onClose.run();
                     }
                 }

@@ -62,6 +62,7 @@ public class MenuBarView extends LinearLayout {
     }
 
     private final List<Entry> entries = new ArrayList<>();
+    private final List<MenuButtonView> buttons = new ArrayList<>();
 
     public MenuBarView(Context context) {
         super(context);
@@ -78,13 +79,26 @@ public class MenuBarView extends LinearLayout {
         rebuild();
     }
 
+    /**
+     * Mark one button active (white cell, like Skylight's
+     * selected Calendar), or clear all with null. Used when
+     * a page is open: the tab that opened it is the active one.
+     */
+    public void setActive(String label) {
+        for (MenuButtonView button : buttons) {
+            button.setSelected(label != null && label.equals(button.getLabel()));
+        }
+    }
+
     private void rebuild() {
         removeAllViews();
+        buttons.clear();
         for (Entry e : entries) {
             MenuButtonView button = new MenuButtonView(getContext(), e.label, e.icon,
                     e.onTap, e.onLongPress, MenuButtonView.DEFAULT_HOLD_MS);
             LayoutParams lp = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1f);
             addView(button, lp);
+            buttons.add(button);
         }
         // Blank slots: transparent and not clickable, so taps
         // pass through to the native bar underneath (nothing

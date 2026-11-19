@@ -28,7 +28,10 @@ import android.widget.TextView;
  * interruption and Close is the way back.
  *
  * PAGE (EXTRA_PAGE = true): covers everything *except* the menu
- * bar. The window is sized to the top 95.78% of the screen
+ * bar. Retained as a fallback only — tabs now use
+ * PageOverlayView instead (see that class), because an activity
+ * still switches Skylight away with a slide animation, however
+ * the window is sized. The window is sized to the top 95.78% of the screen
  * (MenuBarView.BAR_TOP) and pinned to the top, and tapping
  * outside the window — i.e. on the menu bar — finishes it.
  * That is the point: the bar stays visible and tappable while

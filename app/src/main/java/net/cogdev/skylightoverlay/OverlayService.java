@@ -33,9 +33,10 @@ import java.io.File;
  *
  * Registered buttons, in slot order (see MenuBarView.register):
  *   1. Hatch — tap: Home; hold 5s: Android Settings.
- *   2. BanKin — tap: open the kids' bank webapp in the renderer
- *      in page mode (top 95.78% of the screen, menu bar left
+ *   2. BanKin — tap: open the kids' bank webapp as a page
+ *      overlay (top 95.78% of the screen, menu bar left
  *      visible and tappable; tapping the bar closes the page).
+ *      No activity switch: Skylight stays foreground.
  * Slots 3-4 are blank for now, ready for family buttons.
  */
 public class OverlayService extends Service {
@@ -45,7 +46,74 @@ public class OverlayService extends Service {
 
     private WindowManager windowManager;
     private MenuBarView menuBarView;
+    private WindowManager.LayoutParams menuBarParams;
+    private PageOverlayView pageView;
     private NtfyListener ntfyListener;
+
+    /**
+     * Show a page as a true overlay (no activity switch).
+     * Skylight stays the foreground activity; this window sits
+     * on top of it for the top 95.78% of the screen, and the
+     * menu bar stays live underneath. The menu-bar overlay is
+     * re-added on top of the page window, so Hatch / BanKin
+     * stay tappable while a page is open.
+     */
+    private void showPage(String title, String url) {
+        if (pageView != null) {
+            pageView.loadUrl(url);
+            return;
+        }
+        DisplayMetrics metrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getRealMetrics(metrics);
+        int barHeight = metrics.heightPixels - (int) (metrics.heightPixels * MenuBarView.BAR_TOP);
+
+        final PageOverlayView view = new PageOverlayView(this, title, url,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        hidePage();
+                    }
+                });
+        view.setBarHeight(barHeight);
+
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                        ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                        : WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT);
+        params.gravity = Gravity.TOP | Gravity.START;
+        params.x = 0;
+        params.y = 0;
+
+        try {
+            windowManager.addView(view, params);
+            pageView = view;
+        } catch (Exception e) {
+            return;
+        }
+        // Re-add the menu bar on top of the page window, so
+        // Hatch / BanKin stay tappable while a page is open.
+        if (menuBarView != null && menuBarParams != null) {
+            try {
+                windowManager.removeView(menuBarView);
+                windowManager.addView(menuBarView, menuBarParams);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    private void hidePage() {
+        if (pageView == null) return;
+        try {
+            windowManager.removeView(pageView);
+        } catch (Exception ignored) {
+        }
+        pageView.destroyWebView();
+        pageView = null;
+    }
 
     @Override
     public void onCreate() {
@@ -61,6 +129,7 @@ public class OverlayService extends Service {
         ntfyListener = new NtfyListener(this, server, topic, token, new NtfyListener.Callback() {
             @Override
             public void onRenderHtml(String title, String html) {
+                hidePage();
                 Intent i = new Intent(OverlayService.this, RendererActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 i.putExtra(RendererActivity.EXTRA_TITLE, title);
@@ -70,6 +139,7 @@ public class OverlayService extends Service {
 
             @Override
             public void onRenderUrl(String title, String url) {
+                hidePage();
                 Intent i = new Intent(OverlayService.this, RendererActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 i.putExtra(RendererActivity.EXTRA_TITLE, title);
@@ -79,6 +149,7 @@ public class OverlayService extends Service {
 
             @Override
             public void onRenderFile(String title, File file) {
+                hidePage();
                 Intent i = new Intent(OverlayService.this, RendererActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 i.putExtra(RendererActivity.EXTRA_TITLE, title);
@@ -88,6 +159,7 @@ public class OverlayService extends Service {
 
             @Override
             public void onNotification(String level, String title, String message) {
+                hidePage();
                 Intent i = new Intent(OverlayService.this, RendererActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 i.putExtra(RendererActivity.EXTRA_TITLE, title);
@@ -128,12 +200,14 @@ public class OverlayService extends Service {
             params.gravity = Gravity.TOP | Gravity.START;
             params.x = left;
             params.y = top;
+            menuBarParams = params;
 
             menuBarView = new MenuBarView(this);
             menuBarView.register("Hatch", MenuButtonView.Icon.GEAR,
                     new Runnable() {
                         @Override
                         public void run() {
+                            hidePage();
                             Intent home = new Intent(Intent.ACTION_MAIN);
                             home.addCategory(Intent.CATEGORY_HOME);
                             home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -152,12 +226,7 @@ public class OverlayService extends Service {
                     new Runnable() {
                         @Override
                         public void run() {
-                            Intent i = new Intent(OverlayService.this, RendererActivity.class);
-                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            i.putExtra(RendererActivity.EXTRA_TITLE, "BanKin");
-                            i.putExtra(RendererActivity.EXTRA_URL, "https://bankin.home.kina.st");
-                            i.putExtra(RendererActivity.EXTRA_PAGE, true);
-                            startActivity(i);
+                            showPage("BanKin", "https://bankin.home.kina.st");
                         }
                     },
                     null);
@@ -201,6 +270,7 @@ public class OverlayService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        hidePage();
         if (ntfyListener != null) {
             ntfyListener.stop();
             ntfyListener = null;
